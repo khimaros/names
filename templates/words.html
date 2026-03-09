@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}words — names{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>words <span class="count" id="word-count">({{ words|length }})</span></h1>
+  <label class="fav-filter"><input type="checkbox" id="fav-only-cb"> favorites only</label>
+</div>
+
+<form method="get" action="/" class="filters" id="filter-form">
+  {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+  <div class="filter-group">
+    <label>language</label>
+    <select name="lang" multiple>
+      {% for l in languages %}
+      <option value="{{ l }}" {{ 'selected' if l in langs }}>{{ l }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-group filter-group-wide">
+    <label>meaning</label>
+    <select name="meaning" multiple>
+      {% for m in meaning_labels %}
+      <option value="{{ m }}" {{ 'selected' if m in meanings_filter }}>{{ m }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>gender</label>
+    <select name="gender" multiple>
+      <option value="m" {{ 'selected' if 'm' in genders }}>m</option>
+      <option value="f" {{ 'selected' if 'f' in genders }}>f</option>
+      <option value="n" {{ 'selected' if 'n' in genders }}>n</option>
+      <option value="unspecified" {{ 'selected' if 'unspecified' in genders }}>unspecified</option>
+    </select>
+  </div>
+  {% if langs or meanings_filter or genders or q %}
+  <div class="filter-group">
+    <label>&nbsp;</label>
+    <a href="/" class="filter-clear">clear</a>
+  </div>
+  {% endif %}
+</form>
+<script>
+document.querySelectorAll('#filter-form select').forEach(function(s) {
+  s.addEventListener('change', function() { document.getElementById('filter-form').submit(); });
+});
+</script>
+
+<table>
+<thead><tr>
+  <th class="col-fav"></th>
+  <th class="col-word" data-sort>word</th><th class="col-rom" data-sort>romanized</th><th class="col-lang" data-sort>lang</th><th class="col-gender">gender</th><th class="col-meanings">meanings</th><th class="col-note">note</th>
+</tr></thead>
+<tbody>
+{% for w in words %}
+<tr data-id="{{ w.id }}">
+  <td><button class="fav-btn" data-id="{{ w.id }}" title="toggle favorite">☆</button></td>
+  <td><a href="/word/{{ w.id }}">{{ w.text }}</a></td>
+  <td class="romanized">{{ w.romanized or w.text }}</td>
+  <td><a href="/language/{{ w.language }}">{{ w.language }}</a></td>
+  <td>{{ w.gender or '' }}</td>
+  <td class="meanings-col">
+    {% if w.meanings %}
+      {% for m in w.meanings.split(', ') %}
+        <a href="/words?meaning={{ m }}" class="tag">{{ m }}</a>
+      {% endfor %}
+    {% endif %}
+  </td>
+  <td class="note">{{ w.note or '' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<script src="/static/favorites.js"></script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ word.text }} — names{% endblock %}
+{% block content %}
+<h1><button class="fav-btn fav-btn-lg" data-id="{{ word.id }}" title="toggle favorite">☆</button> {{ word.text }}{% if word.romanized %} <span class="romanized">({{ word.romanized }})</span>{% endif %}</h1>
+
+<div class="word-meta">
+  <span class="lang"><a href="/language/{{ word.language }}">{{ word.language }}</a></span>
+  {% if word.gender %}<span class="gender">{{ word.gender }}</span>{% endif %}
+</div>
+
+{% if word.note %}
+<p class="note">{{ word.note }}</p>
+{% endif %}
+
+<section class="meanings">
+<h2>meanings</h2>
+{% if meanings %}
+<ul class="tag-list">
+  {% for m in meanings %}
+  <li><a href="/meaning/{{ m.id }}" class="tag meaning-tag">{{ m.label }}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">no meanings assigned</p>
+{% endif %}
+</section>
+
+{% macro word_table(words) %}
+<table class="compact">
+<colgroup>
+  <col class="col-word-c"><col class="col-rom-c"><col class="col-gender-c"><col class="col-meanings-c"><col class="col-note-c">
+</colgroup>
+<tbody>
+{% for w in words %}
+<tr>
+  <td><a href="/word/{{ w.id }}">{{ w.text }}</a></td>
+  <td class="romanized">{{ w.romanized or w.text }}</td>
+  <td>{% if w.gender %}{{ w.gender }}{% endif %}</td>
+  <td class="meanings-col">
+    {% if w.meanings %}
+      {% for m in w.meanings.split(', ') %}
+        <a href="/words?meaning={{ m }}" class="tag">{{ m }}</a>
+      {% endfor %}
+    {% endif %}
+  </td>
+  <td class="note">{{ w.note or '' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endmacro %}
+
+{% if soundalikes %}
+<section class="relations">
+<h2>sound-alikes</h2>
+{% for lang, words in soundalikes.items()|sort %}
+<details class="lang-group" open>
+  <summary><a href="/language/{{ lang }}">{{ lang }}</a> <span class="count">({{ words|length }})</span></summary>
+  {{ word_table(words) }}
+</details>
+{% endfor %}
+</section>
+{% endif %}
+
+{% if translations %}
+<section class="relations">
+<h2>translations</h2>
+{% for lang, words in translations.items()|sort %}
+<details class="lang-group" open>
+  <summary><a href="/language/{{ lang }}">{{ lang }}</a> <span class="count">({{ words|length }})</span></summary>
+  {{ word_table(words) }}
+</details>
+{% endfor %}
+</section>
+{% endif %}
+
+<script src="/static/favorites.js"></script>
+{% endblock %}

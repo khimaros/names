@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ meaning.label }} — names{% endblock %}
+{% block content %}
+<h1>{{ meaning.label }}</h1>
+
+<p>{{ words_by_lang.values()|map('length')|sum }} words across {{ words_by_lang|length }} languages</p>
+
+{% for lang, words in words_by_lang.items()|sort %}
+<section>
+<h2><a href="/language/{{ lang }}">{{ lang }}</a> <span class="count">({{ words|length }})</span></h2>
+<table>
+<colgroup>
+  <col class="col-word-wide"><col class="col-rom"><col class="col-gender"><col class="col-meanings-wide"><col class="col-note-wide">
+</colgroup>
+<tbody>
+{% for w in words %}
+<tr>
+  <td><a href="/word/{{ w.id }}">{{ w.text }}</a></td>
+  <td class="romanized">{{ w.romanized or w.text }}</td>
+  <td>{% if w.gender %}{{ w.gender }}{% endif %}</td>
+  <td class="meanings-col">
+    {% if w.all_meanings %}
+      {% for m in w.all_meanings.split(', ') %}
+        {% if m != meaning.label %}
+          <a href="/words?meaning={{ m }}" class="tag">{{ m }}</a>
+        {% else %}
+          <span class="tag current">{{ m }}</span>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </td>
+  <td class="note">{{ w.note or '' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</section>
+{% endfor %}
+{% endblock %}

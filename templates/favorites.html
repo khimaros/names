@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}favorites — names{% endblock %}
+{% block content %}
+<h1>favorites <span class="count" id="fav-count"></span></h1>
+<p id="fav-empty" style="display:none" class="empty">no favorites yet — click ★ on any word to add it</p>
+<table id="fav-table" style="display:none">
+<thead><tr>
+  <th class="col-fav"></th>
+  <th class="col-word" data-sort>word</th><th class="col-rom" data-sort>romanized</th><th class="col-lang" data-sort>lang</th><th class="col-gender">gender</th><th class="col-meanings">meanings</th><th class="col-note">note</th>
+</tr></thead>
+<tbody id="fav-body"></tbody>
+</table>
+<script src="/static/favorites.js"></script>
+<script>
+(function() {
+  var favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  if (!favs.length) {
+    document.getElementById('fav-empty').style.display = '';
+    return;
+  }
+  var params = favs.map(function(id) { return 'id=' + id; }).join('&');
+  fetch('/api/words?' + params)
+    .then(function(r) { return r.json(); })
+    .then(function(words) {
+      var tbody = document.getElementById('fav-body');
+      words.forEach(function(w) {
+        var tr = document.createElement('tr');
+        tr.dataset.id = w.id;
+        var meanings = '';
+        if (w.meanings) {
+          meanings = w.meanings.split(', ').map(function(m) {
+            return '<a href="/words?meaning=' + m + '" class="tag">' + m + '</a>';
+          }).join(' ');
+        }
+        tr.innerHTML =
+          '<td><button class="fav-btn active" data-id="' + w.id + '" title="toggle favorite">★</button></td>' +
+          '<td><a href="/word/' + w.id + '">' + w.text + '</a></td>' +
+          '<td class="romanized">' + (w.romanized || w.text) + '</td>' +
+          '<td><a href="/language/' + w.language + '">' + w.language + '</a></td>' +
+          '<td>' + (w.gender || '') + '</td>' +
+          '<td class="meanings-col">' + meanings + '</td>' +
+          '<td class="note">' + (w.note || '') + '</td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('fav-table').style.display = '';
+      document.getElementById('fav-count').textContent = '(' + words.length + ')';
+      initFavButtons();
+      restoreSort();
+    });
+})();
+</script>
+{% endblock %}

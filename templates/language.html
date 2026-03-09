@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ lang }} — names{% endblock %}
+{% block content %}
+<h1>{{ lang }} <span class="count">({{ words|length }} words)</span></h1>
+
+<div class="facets">
+  <h3>meanings in {{ lang }}</h3>
+  <ul class="tag-list">
+  {% for m, ws in by_meaning.items() %}
+    <li><a href="/words?lang={{ lang }}&meaning={{ m }}" class="tag">{{ m }}</a> <span class="count">({{ ws|length }})</span></li>
+  {% endfor %}
+  </ul>
+</div>
+
+<table>
+<thead><tr>
+  <th class="col-word-wide" data-sort>word</th><th class="col-rom" data-sort>romanized</th><th class="col-gender">gender</th><th class="col-meanings-wide">meanings</th><th class="col-note-wide">note</th>
+</tr></thead>
+<tbody>
+{% for w in words %}
+<tr>
+  <td><a href="/word/{{ w.id }}">{{ w.text }}</a></td>
+  <td class="romanized">{{ w.romanized or w.text }}</td>
+  <td>{{ w.gender or '' }}</td>
+  <td class="meanings-col">
+    {% if w.meanings %}
+      {% for m in w.meanings.split(', ') %}
+        <a href="/words?meaning={{ m }}" class="tag">{{ m }}</a>
+      {% endfor %}
+    {% endif %}
+  </td>
+  <td class="note">{{ w.note or '' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

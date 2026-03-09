@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}meanings — names{% endblock %}
+{% block content %}
+<h1>meanings <span class="count">({{ meanings|length }})</span></h1>
+
+<table>
+<thead><tr>
+  <th class="col-meaning-label">meaning</th><th class="col-count">words</th><th class="col-count">languages</th>
+</tr></thead>
+<tbody>
+{% for m in meanings %}
+<tr>
+  <td><a href="/meaning/{{ m.id }}">{{ m.label }}</a></td>
+  <td>{{ m.word_count }}</td>
+  <td>{{ m.lang_count }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

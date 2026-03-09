@@ -1,0 +1,8 @@
+[project]
+name = "names"
+version = "0.1.0"
+description = "a multilingual names database"
+requires-python = ">=3.12"
+dependencies = [
+    "flask",
+]

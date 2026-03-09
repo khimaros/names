@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}names{% endblock %}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">words</a>
+  <a href="/meanings">meanings</a>
+  <a href="/languages">languages</a>
+  <a href="/favorites">favorites</a>
+  <form method="get" action="/" class="nav-search">
+    <input type="text" name="q" placeholder="search..." value="{{ request.args.get('q', '') }}">
+  </form>
+</nav>
+<main>
+{% block content %}{% endblock %}
+</main>
+<script>
+function doSort(table, col, asc) {
+  var tbody = table.querySelector('tbody');
+  if (!tbody) return;
+  var rows = Array.from(tbody.rows);
+  table.querySelectorAll('th[data-sort]').forEach(function(h) { h.dataset.dir = ''; });
+  var th = table.querySelectorAll('thead th')[col];
+  if (th) th.dataset.dir = asc ? 'asc' : 'desc';
+  rows.sort(function(a, b) {
+    var va = (a.cells[col] || {}).textContent || '';
+    var vb = (b.cells[col] || {}).textContent || '';
+    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  rows.forEach(function(r) { tbody.appendChild(r); });
+}
+document.addEventListener('click', function(e) {
+  var th = e.target.closest('th[data-sort]');
+  if (!th) return;
+  var table = th.closest('table');
+  var col = th.cellIndex;
+  var asc = th.dataset.dir !== 'asc';
+  doSort(table, col, asc);
+  try { localStorage.setItem('sort', JSON.stringify({col: col, dir: asc ? 'asc' : 'desc'})); } catch(e) {}
+});
+/* restore saved sort — called from page scripts after DOM is ready */
+function restoreSort() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('sort'));
+    if (saved && saved.col != null) {
+      var table = document.querySelector('table');
+      if (table) doSort(table, saved.col, saved.dir === 'asc');
+    }
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
